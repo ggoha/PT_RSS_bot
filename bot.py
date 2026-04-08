@@ -7,9 +7,10 @@ from deep_translator import GoogleTranslator
 
 RSS_URL = "https://www.diariocoimbra.pt/feed/"
 BOT_TOKEN = os.environ["BOT_TOKEN"]
-CHAT_ID = os.environ["CHAT_ID"]
+CHAT_IDS = [cid.strip() for cid in os.environ["CHAT_ID"].split(",")]
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 SEEN_FILE = "seen.json"
+EXCLUDED_TAGS = {"Desporto", "Fotogaleria"}
 
 
 def load_seen():
@@ -25,11 +26,12 @@ def save_seen(seen):
 
 
 def send_message(text):
-    requests.post(
-        f"{TELEGRAM_API}/sendMessage",
-        json={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"},
-        timeout=10,
-    )
+    for chat_id in CHAT_IDS:
+        requests.post(
+            f"{TELEGRAM_API}/sendMessage",
+            json={"chat_id": chat_id, "text": text, "parse_mode": "HTML"},
+            timeout=10,
+        )
 
 
 def format_message(entry):
@@ -67,6 +69,10 @@ def main():
     for entry in articles:
         entry_id = entry.get("id") or entry.get("link")
         if entry_id in seen:
+            continue
+        entry_tags = {t["term"] for t in entry.get("tags", [])}
+        if entry_tags & EXCLUDED_TAGS:
+            seen.add(entry_id)
             continue
         send_message(format_message(entry))
         seen.add(entry_id)
