@@ -10,7 +10,7 @@ BOT_TOKEN = os.environ["BOT_TOKEN"]
 CHAT_IDS = [cid.strip() for cid in os.environ["CHAT_ID"].split(",")]
 TELEGRAM_API = f"https://api.telegram.org/bot{BOT_TOKEN}"
 SEEN_FILE = "seen.json"
-EXCLUDED_TAGS = {"Desporto", "Fotogaleria"}
+EXCLUDED_TAGS = {"Desporto", "Fotogaleria", "Crime"}
 
 
 def load_seen():
